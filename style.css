@@ -1,0 +1,106 @@
+:root {
+  --ink: #1a1a1a;
+  --quiet: #666;
+  --line: #d9d9d9;
+  --bg: #f6f7f9;
+  --card: #fff;
+  --accent: #2b6cb0;
+  --bad: #fde2e2;
+  --bad-ink: #b42318;
+  --ok: #e7f5ec;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.5;
+}
+.top, main, .foot { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+.top { padding-top: 20px; }
+h1 { font-size: 1.5rem; margin: 0 0 8px; }
+h1 .sub { font-size: 0.95rem; font-weight: 500; color: var(--quiet); margin-left: 6px; }
+h2 { font-size: 1.1rem; margin: 0 0 8px; }
+.value { margin: 0 0 10px; font-weight: 600; }
+button.demo { font-size: 1.02rem; padding: 10px 16px; margin: 0 0 12px; }
+.guide { background: #fff4e5; border-left: 4px solid #d97706; border-radius: 6px; padding: 8px 10px; margin: 0 0 10px; font-weight: 600; }
+.guide.ok { background: var(--ok); border-left-color: #2f855a; }
+.howto { margin: 0 0 16px; padding-left: 20px; color: var(--quiet); font-size: 0.92rem; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+.small { font-size: 0.85rem; color: var(--quiet); }
+label { font-size: 0.92rem; }
+select, textarea, input[type="text"] {
+  font: inherit;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  max-width: 100%;
+}
+textarea { width: 100%; resize: vertical; font-family: ui-monospace, Consolas, monospace; }
+.seg { display: inline-flex; gap: 8px; }
+button {
+  font: inherit;
+  border-radius: 6px;
+  padding: 7px 14px;
+  cursor: pointer;
+  border: 1px solid var(--accent);
+}
+button.primary { background: var(--accent); color: #fff; }
+button.ghost { background: #fff; color: var(--accent); }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+th, td { border-bottom: 1px solid var(--line); padding: 2px 4px; text-align: left; }
+th { font-size: 0.85rem; color: var(--quiet); font-weight: 600; }
+td.num { color: var(--quiet); width: 2.2em; font-size: 0.85rem; }
+td input { width: 100%; border: 1px solid transparent; border-radius: 4px; padding: 4px 6px; font: inherit; }
+td input:focus { border-color: var(--accent); outline: none; }
+td input.bad { background: var(--bad); }
+tr.outlier td.num { color: var(--bad-ink); font-weight: 700; }
+td .del { border: none; background: none; color: var(--quiet); padding: 2px 6px; }
+.msg { min-height: 1.5em; margin: 6px 0 0; font-size: 0.92rem; }
+.msg.bad { color: var(--bad-ink); }
+.msg.warn { color: #9a6700; }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0 0 12px; }
+dt { color: var(--quiet); }
+dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 600; }
+canvas { display: block; width: 100%; max-width: 100%; }
+#plot { height: 320px; }
+#resid { height: 140px; margin-top: 4px; }
+.legend { margin: 6px 0; }
+.eq {
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 8px 0 0;
+}
+.eq:empty { display: none; }
+.done { background: var(--ok); border-radius: 6px; padding: 8px; margin: 8px 0 0; }
+.foot { padding-bottom: 24px; }
+
+@media (max-width: 480px) {
+  h1 .sub { display: block; margin: 0; }
+  #plot { height: 260px; }
+  .row button { flex: 1 1 auto; }
+  button.demo { width: 100%; }
+  dl { grid-template-columns: 1fr; gap: 0 0; }
+  dd { margin-bottom: 6px; }
+}
+
+/* 넓은 화면(1000px 이상)은 입력·결과 2단: 30초 체험을 누르면 안내·ΔH·× 가 첫 화면에 함께 보인다(r2 C2-08).
+   main 바로 아래에는 카드를 더하지 않는다. 새 내용은 기존 카드(#input-card, #result-card) 안에 넣는다(SPEC 6장) */
+@media (min-width: 1000px) {
+  .top, .foot { max-width: 1240px; }
+  main { max-width: 1240px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  main > .card { margin-bottom: 0; }
+}

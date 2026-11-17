@@ -164,7 +164,7 @@
   ];
   // 예시마다 점을 50개로(사람 요청): 위에 적은 점들로 구한 직선(선형화한 좌표)에 같은 크기의 작은 잡음을 얹어
   // 다시 만든다. 씨앗이 고정이라 언제 열어도 같은 값이다. 모두 직접 만든 연습용 데이터다.
-  var MADE50 = '교과서 수준의 예시 값(직접 만든 연습용 데이터, 50점)';
+  var MADE50 = '교과서 수준의 예시 값(직접 만든 연습용 데이터 50점, 그중 1점은 일부러 틀리게 넣은 값)';
   var TF = {
     vanthoff: ['invT', 'ln'], arrhenius: ['invT', 'ln'], clausius: ['invT', 'ln'],
     first: ['id', 'ln'], second: ['id', 'inv'], lineweaver: ['inv', 'inv'],
@@ -192,14 +192,20 @@
     for (i = 0; i < s.id.length; i++) seed = (seed * 31 + s.id.charCodeAt(i)) >>> 0;
     function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
     function gauss() { var u = 0, k; for (k = 0; k < 6; k++) u += rnd(); return (u - 3) / Math.sqrt(0.5); }
+    // 사람 요청: 예시마다 측정값 하나는 일부러 틀리게(직선에서 눈에 띄게 벗어나게) 넣는다
+    // → ×와 "이상치를 뺀 직선"을 예시에서 바로 볼 수 있다. 어느 행인지는 wrongRow에 적어 둔다.
+    var wrong = 15 + seed % 20;                                   // 가운데쯤의 한 행(0부터)
+    var span = Math.abs(b * (fwd(tf[0], s.rows[n - 1][0], s) - fwd(tf[0], s.rows[0][0], s)));
+    var slip = Math.max(8 * sd, 0.08 * span) * (tf[1] === 'inv' || seed % 2 ? 1 : -1);
     var x0 = s.rows[0][0], x1 = s.rows[n - 1][0], rows = [];
     for (i = 0; i < N; i++) {
       var x = sig(x0 + (x1 - x0) * i / (N - 1), 4);
-      var y = back(tf[1], a + b * fwd(tf[0], x, s) + sd * gauss());
+      var y = back(tf[1], a + b * fwd(tf[0], x, s) + sd * gauss() + (i === wrong ? slip : 0));
       if (!isFinite(y) || (tf[1] !== 'id' && y <= 0)) return;   // 이상하면 원래 값을 그대로 둔다
       rows.push([x, sig(y, 4)]);
     }
     s.rows = rows;
+    s.wrongRow = wrong + 1;                                       // 일부러 틀리게 넣은 행(1부터)
     s.source = MADE50;
   }
   SCENARIOS.forEach(function (s) { densify(s, 50); });

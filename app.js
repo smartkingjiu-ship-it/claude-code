@@ -793,8 +793,12 @@
     $('btn-png').addEventListener('click', savePng);
     $('ref-in').addEventListener('input', function () { if (state.result) updateRef(state.result); });
 
-    var t;
+    var t, lastW = window.innerWidth;
     window.addEventListener('resize', function () {
+      // 휴대폰에서는 스크롤할 때 주소창이 접히며 높이만 바뀌는 resize가 온다. 폭이 그대로면 다시 그리지 않는다
+      // (다시 그리면 재생 중인 선형화 애니메이션이 끊겨 완성된 그림만 보인다).
+      if (window.innerWidth === lastW) return;
+      lastW = window.innerWidth;
       clearTimeout(t);
       t = setTimeout(function () { if (state.result && !$('result-card').hidden) render(state.result); }, 150);
     });

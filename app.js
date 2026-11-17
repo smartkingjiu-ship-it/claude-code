@@ -136,9 +136,10 @@
     if (card.hidden) return;
     var r = $('plot').getBoundingClientRect(), vh = window.innerHeight;
     if (r.top >= 0 && r.bottom <= vh) return;   // 이미 다 보인다
-    var smooth = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    // 그래프가 화면보다 낮으면 가운데로, 높으면 위쪽 끝을 맞춘다
-    $('plot').scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: r.height < vh ? 'center' : 'start' });
+    // 그래프가 화면보다 낮으면 가운데로, 높으면 위쪽 끝을 맞춘다.
+    // 부드럽게 내려가지 않고 바로 옮긴다: 한 줄 배치(휴대폰 · 좁은 창)에서는 결과가 멀리 아래에 있어,
+    // 부드럽게 내려가는 동안 3초짜리 선형화 애니메이션이 화면 밖에서 끝나 버린다.
+    $('plot').scrollIntoView({ behavior: 'auto', block: r.height < vh ? 'center' : 'start' });
   }
 
   function updateGuide(result) {

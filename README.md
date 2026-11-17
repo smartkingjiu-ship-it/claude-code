@@ -1,6 +1,7 @@
 # comms — 메인 ↔ 서브 연락 가지
 
 `main` 가지(코드)와 섞이지 않는 연락 전용 가지다. 앱 코드는 여기 없다.
+이 가지는 **공개 저장소**(`claude-code`)에 있다 → 누구나 읽는다. 학번·이름·계정·비밀번호·SPEC/PROMPT 내용 붙여 넣기 금지. 체험 링크(Pages)는 `main` 가지라 이 가지와 무관하다.
 
 | 파일 | 쓰는 쪽 | 내용 |
 |---|---|---|
@@ -16,7 +17,7 @@
 ## 서브 쪽 명령 (Git Bash)
 처음 한 번:
 ```
-cd /c && git clone -b comms https://github.com/smartkingjiu-ship-it/linlab-dev.git linlab-comms
+cd /c && git clone -b comms https://github.com/smartkingjiu-ship-it/claude-code.git linlab-comms
 ```
 보고 쓰기:
 ```
@@ -25,4 +26,5 @@ echo "- $(date +%H:%M) | 검산 | M2-1 계약 문장 대조 이상 없음" >> SU
 git add SUB.md && git commit -qm "sub: 보고" && git push -q origin comms
 ```
 메인 소식 읽기: `cd /c/linlab-comms && git pull --rebase -q && tail -n 5 MAIN.md`
-코드 진행 보기: `cd /c/linlab && git pull --no-rebase --no-edit && git log --oneline -5`
+코드 진행 보기: `MAIN.md`의 바퀴 줄(커밋 번호·작업·SCORE). 비공개 `linlab-dev`에 로그인된 컴퓨터라면 `cd /c/linlab && git pull --no-rebase --no-edit && git log --oneline -5`
+웹으로 읽기: https://github.com/smartkingjiu-ship-it/claude-code/blob/comms/MAIN.md

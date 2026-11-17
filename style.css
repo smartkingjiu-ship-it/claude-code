@@ -449,6 +449,13 @@ canvas { display: block; width: 100%; max-width: 100%; background: #fff; }
   .foot { margin-top: 18px; }
 }
 
+/* 창 높이가 낮을 때(옆에 띄운 좁은 창, 가로로 눕힌 휴대폰 등): 그래프 전체가 한 화면에 들어오게 줄인다
+   → 점이 찍히는 과정이 화면 아래로 잘리지 않는다 */
+@media (max-height: 560px) {
+  #plot { height: clamp(150px, 60vh, 320px); }
+  #resid { height: clamp(90px, 28vh, 140px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

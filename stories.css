@@ -1,0 +1,165 @@
+/* stories.css — 실험 이야기 갤러리(#stories)와 상황 팝업(#story-modal). st- 접두사 클래스만 꾸민다. */
+
+/* ---------- 갤러리 ---------- */
+#stories {
+  margin: 0 0 14px;
+  padding: 0 0 12px;
+  border-bottom: 1px dashed var(--line, #e3e6f5);
+  min-width: 0;
+  max-width: 100%;
+}
+#stories[hidden] { display: none; }
+#stories .st-title {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0; font-size: 1.08rem; line-height: 1.3;
+  color: var(--ink, #1b1f3b);
+}
+#stories .st-title::before {
+  content: ""; flex: 0 0 auto;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--grad, linear-gradient(135deg, #5b5bf0, #8b5cf6 55%, #ec4899));
+}
+#stories .st-sub { margin: 4px 0 8px; font-size: 0.85rem; color: var(--muted, #6b7190); }
+
+/* 좁은 화면: 줄 안에서만 옆으로 넘긴다(페이지는 옆으로 밀리지 않는다) */
+.st-row {
+  display: flex; gap: 10px;
+  overflow-x: auto; overscroll-behavior-x: contain;
+  padding: 6px 4px 12px; margin: 0 -4px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  contain: inline-size;
+}
+.st-card {
+  flex: 0 0 auto; width: 168px; min-height: 0;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+  margin: 0; padding: 12px 12px 10px;
+  text-align: left; white-space: normal;
+  font: inherit; color: var(--ink, #1b1f3b);
+  border: 2px solid transparent; border-radius: 16px;
+  background:
+    linear-gradient(var(--card, #ffffff), var(--card, #ffffff)) padding-box,
+    var(--grad, linear-gradient(135deg, #5b5bf0, #8b5cf6 55%, #ec4899)) border-box;
+  box-shadow: 0 2px 8px rgba(91, 91, 240, 0.12);
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.st-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(91, 91, 240, 0.24); }
+.st-card:active { transform: translateY(-1px); }
+.st-card:focus-visible { outline: 3px solid var(--accent, #06b6d4); outline-offset: 2px; }
+.st-card.is-on { box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.28), 0 8px 18px rgba(91, 91, 240, 0.2); }
+.st-emoji { font-size: 1.8rem; line-height: 1.1; }
+.st-name { font-weight: 700; font-size: 0.95rem; line-height: 1.3; }
+.st-hook { flex: 1 1 auto; font-size: 0.8rem; line-height: 1.4; color: var(--muted, #6b7190); }
+.st-tag {
+  font-size: 0.7rem; font-weight: 700; line-height: 1.2;
+  padding: 3px 8px; border-radius: 999px;
+  color: var(--primary, #5b5bf0); background: rgba(91, 91, 240, 0.1);
+}
+.st-cta { font-size: 0.78rem; font-weight: 700; color: var(--pink, #ec4899); }
+.st-cta::after { content: " \2192"; }
+
+/* 넓은 화면: 카드가 여러 줄로 접힌다 */
+@media (min-width: 700px) {
+  .st-row {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    overflow-x: visible; contain: none; scroll-snap-type: none;
+  }
+  .st-card { width: auto; }
+}
+
+/* ---------- 결과 카드 위의 이야기 한 줄 ---------- */
+.st-note {
+  margin: 0 0 10px; padding: 8px 12px;
+  font-size: 0.9rem; line-height: 1.5;
+  color: var(--ink, #1b1f3b);
+  border-radius: 12px; border-left: 4px solid var(--pink, #ec4899);
+  background: rgba(236, 72, 153, 0.08);
+  overflow-wrap: anywhere;
+}
+.st-note-emoji { margin-right: 6px; }
+.st-note-q { font-weight: 600; color: var(--primary, #5b5bf0); }
+
+/* ---------- 팝업 ---------- */
+#story-modal {
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; box-sizing: border-box;
+  background: rgba(27, 31, 59, 0.5);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  overscroll-behavior: contain;
+}
+#story-modal[hidden] { display: none; }
+.st-dialog {
+  box-sizing: border-box;
+  width: 100%; max-width: 520px; max-height: 100%;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 0 0 16px;
+  color: var(--ink, #1b1f3b); background: var(--card, #ffffff);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(27, 31, 59, 0.38);
+}
+.st-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 18px 18px 14px;
+  color: #ffffff;
+  background: var(--grad, linear-gradient(135deg, #5b5bf0, #8b5cf6 55%, #ec4899));
+}
+.st-head-emoji { flex: 0 0 auto; font-size: 2.4rem; line-height: 1; }
+.st-head-text { min-width: 0; }
+.st-kind {
+  display: inline-block; margin: 0 0 4px; padding: 2px 8px;
+  font-size: 0.72rem; font-weight: 700;
+  border-radius: 999px; background: rgba(255, 255, 255, 0.22);
+}
+.st-head-title { margin: 0; font-size: 1.2rem; line-height: 1.3; color: #ffffff; overflow-wrap: anywhere; }
+.st-body { padding: 14px 18px 0; }
+.st-scene { margin: 0 0 12px; line-height: 1.65; }
+.st-q {
+  margin: 0 0 10px; padding: 10px 12px;
+  font-weight: 700; line-height: 1.5;
+  border-radius: 12px; border-left: 4px solid var(--pink, #ec4899);
+  background: rgba(236, 72, 153, 0.08);
+}
+.st-q-label {
+  display: block; margin: 0 0 2px;
+  font-size: 0.72rem; font-weight: 700; color: var(--pink, #ec4899);
+}
+.st-how { margin: 0 0 12px; font-size: 0.88rem; line-height: 1.5; color: var(--muted, #6b7190); }
+.st-how b { color: var(--primary, #5b5bf0); }
+.st-table-wrap { overflow-x: auto; }
+.st-table {
+  width: 100%; margin: 0; border-collapse: collapse;
+  font-size: 0.85rem; font-variant-numeric: tabular-nums;
+}
+.st-table .st-cap { caption-side: top; text-align: left; padding: 0 0 4px; font-size: 0.78rem; font-weight: 700; color: var(--muted, #6b7190); }
+.st-table th, .st-table td {
+  padding: 4px 8px; text-align: right;
+  border: 0; border-bottom: 1px solid var(--line, #e3e6f5);
+}
+.st-table th { font-size: 0.78rem; color: var(--muted, #6b7190); background: var(--bg, #f4f5ff); }
+.st-table th:first-child, .st-table .st-n { width: 2.2em; text-align: center; color: var(--muted, #6b7190); }
+.st-more { margin: 4px 0 0; text-align: right; font-size: 0.8rem; color: var(--muted, #6b7190); }
+.st-src { margin: 10px 0 0; font-size: 0.76rem; line-height: 1.5; color: var(--muted, #6b7190); overflow-wrap: anywhere; }
+.st-actions {
+  display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px;
+  padding: 14px 18px 0;
+}
+.st-actions button { flex: 0 1 auto; }
+.st-actions #story-go { flex: 1 1 auto; font-weight: 700; }
+
+/* 등장 효과: 카드를 누른 직후에만 */
+@keyframes st-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes st-pop {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+#story-modal.st-in { animation: st-fade 0.2s ease both; }
+#story-modal.st-in .st-dialog { animation: st-pop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  #story-modal.st-in, #story-modal.st-in .st-dialog { animation: none; }
+  .st-card { transition: none; }
+  .st-card:hover, .st-card:active { transform: none; }
+}

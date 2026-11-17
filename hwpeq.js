@@ -32,11 +32,16 @@
         'DELTA S = ' + pm(v.dS, v.dS_ci) + ' ~rm J/(mol cdot K)'
       ];
     }
+    if (kind === 'arrhenius') {
+      return ['E_a = ' + pm(v.Ea_kJ, v.Ea_ci_kJ) + ' ~rm kJ/mol'];
+    }
     if (kind === 'linear') {
       var b = format.fmtParts(f.b, f.ci95)[0];
       var a = format.fmtParts(f.a, f.ci95a)[0];
       var lines = ['y = ' + b + ' x ' + signed(a)];
-      if (f.ci95 != null) lines.push('b = ' + pm(f.b, f.ci95) + ' ~ (95 % ~rm CI)');
+      // 오차가 0이거나 null이면 +- 와 (95 % CI) 꼬리를 모두 뺀다
+      if (format.fmtParts(f.b, f.ci95)[1] != null) lines.push('b = ' + pm(f.b, f.ci95) + ' ~ (95 % ~rm CI)');
+      else if (f.ci95 != null) lines.push('b = ' + pm(f.b, null));
       return lines;
     }
     var err = new Error('한글 수식 미지원 종류: ' + kind);
@@ -44,5 +49,18 @@
     throw err;
   }
 
-  return { hwpEquations: hwpEquations };
+  /** 한 줄을 한글 수식 한 상자용으로: 첫 " = " → " &= ", "값 +- 오차" → "( 값 +- 오차 )" */
+  function blockLine(line) {
+    return line.replace(' = ', ' &= ').replace(/(\S+) \+- (\S+)/, '( $1 +- $2 )');
+  }
+
+  /**
+   * hwpBlock(result, kind) → 문자열 하나
+   * 한글 수식 편집기는 Enter를 무시하고 #로 줄을 바꾼다. 줄 사이는 " #\n", 마지막 줄 끝에는 # 없음
+   */
+  function hwpBlock(result, kind) {
+    return hwpEquations(result, kind).map(blockLine).join(' #\n');
+  }
+
+  return { hwpEquations: hwpEquations, hwpBlock: hwpBlock };
 });

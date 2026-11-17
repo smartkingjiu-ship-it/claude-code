@@ -13,26 +13,34 @@
   /**
    * parsePasted(text) → [[c1, c2], ...]
    * 탭 · 쉼표 · 세미콜론 · 공백 구분, \r\n 처리, 빈 줄 무시.
-   * 첫 줄에 숫자가 아닌 칸이 있으면 머리글로 보고 건너뛴다.
+   * 첫 줄 칸이 모두 숫자가 아니면 머리글로 보고 건너뛴다.
    * 숫자인 칸은 number, 아닌 칸은 원래 글자 그대로 둔다(화면에서 빨갛게 표시).
    */
   var THOUSANDS = /^-?[1-9]\d{0,2}(,\d{3})+(\.\d+)?$/;
 
-  function parsePasted(text) {
-    var lines = String(text).split(/\r?\n|\r/)
-      .map(function (l) { return l.trim(); })
-      .filter(function (l) { return l !== ''; });
-    var rows = lines.map(function (l) {
-      var cells;
-      if (/\t/.test(l)) cells = l.split(/\t/);                    // 탭이 있으면 탭으로만
-      else if (/[,;]/.test(l)) cells = l.split(/\s*[,;]\s*/);
-      else cells = l.split(/\s+/);
-      return cells.slice(0, 2).map(function (c) {
-        c = c.trim();
-        return THOUSANDS.test(c) ? c.replace(/,/g, '') : c;          // 6,926 → 6926 (0,926은 그대로)
-      });
+  // 줄 앞뒤의 공백(스페이스·NBSP·전각 공백 등 탭이 아닌 공백)은 지우고 탭은 남긴다(첫 칸이 빈 행의 열이 밀리지 않게), 빈 줄 무시
+  function pasteLines(text) {
+    return String(text).split(/\r?\n|\r/)
+      .map(function (l) { return l.replace(/^[^\S\t]+|[^\S\t]+$/g, ''); })
+      .filter(function (l) { return l.trim() !== ''; });
+  }
+
+  // 한 줄 → 칸 글자 목록(모든 열)
+  function splitLine(l) {
+    var cells;
+    if (/\t/.test(l)) cells = l.split(/\t/);                    // 탭이 있으면 탭으로만
+    else if (/[,;]/.test(l)) cells = l.split(/\s*[,;]\s*/);
+    else cells = l.split(/\s+/);
+    return cells.map(function (c) {
+      c = c.trim();
+      return THOUSANDS.test(c) ? c.replace(/,/g, '') : c;          // 6,926 → 6926 (0,926은 그대로)
     });
-    if (rows.length && rows[0].some(function (c) { return !isNumText(c); })) rows.shift();
+  }
+
+  function parsePasted(text) {
+    var rows = pasteLines(text).map(splitLine);
+    // 머리글: 첫 줄의 모든 칸(셋째 칸 이후 포함)이 숫자가 아닐 때만 건너뛴다(첫 데이터 줄 오타는 데이터로 남김)
+    if (rows.length && rows[0].every(function (c) { return !isNumText(c); })) rows.shift();
     return rows.map(function (r) {
       return [0, 1].map(function (k) {
         var c = r[k] == null ? '' : r[k];
@@ -40,6 +48,15 @@
       });
     });
   }
+
+  /** checkPaste(text) → { warnings }. 숫자인 칸이 3개 이상인 줄이 있으면 'MANY_COLUMNS' */
+  function checkPaste(text) {
+    var many = pasteLines(text).some(function (l) {
+      return splitLine(l).filter(isNumText).length >= 3;
+    });
+    return { warnings: many ? ['MANY_COLUMNS'] : [] };
+  }
+  var PASTE_WARN = { MANY_COLUMNS: '열이 3개 이상입니다. 앞의 두 열만 썼습니다.' };
 
   function roundTo(v, decimals) {
     if (decimals >= 0) return Number(v.toFixed(decimals));
@@ -56,7 +73,12 @@
   function fmtParts(value, ci) {
     if (value == null || !isFinite(value)) return ['—', null];
     if (ci == null || !isFinite(ci) || ci <= 0) {
-      return [clean(String(Number(value.toPrecision(4)))), null];
+      var s4 = String(Number(value.toPrecision(4)));
+      if (s4.indexOf('e-') >= 0) {              // 1e-6 미만: 과학 표기(1.054e-7) 대신 소수로 쓴다
+        var dec = Math.min(3 - Math.floor(Math.log10(Math.abs(value))), 100);
+        s4 = value.toFixed(dec).replace(/0+$/, '').replace(/\.$/, '');
+      }
+      return [clean(s4), null];
     }
     var e = Math.floor(Math.log10(ci));
     var decimals = 1 - e;                       // 오차 유효숫자 2자리
@@ -88,6 +110,19 @@
     return lines;
   }
 
+  /** resultTSV(result) → 탭 구분 결과 표(한글 표에 바로 붙음). 머리줄 + 기울기·절편·R² 줄, 반폭이 없으면 '-' */
+  function resultTSV(result) {
+    var f = result.fit;
+    function row(name, value, ci) {
+      var p = fmtParts(value, ci);
+      return [name, p[0], p[1] == null ? '-' : p[1]].join('\t');
+    }
+    return ['항목\t값\t95% 반폭',
+      row('기울기', f.b, f.ci95),
+      row('절편', f.a, f.ci95a),
+      ['R²', fmtR2(f.r2), '-'].join('\t')].join('\n');
+  }
+
   /** collectRows(cells) → { c1, c2, rows } — 표 순서의 [[칸1, 칸2], …]에서 두 칸 모두 빈 행만 건너뛰고 표 행 번호(1부터)를 기억 */
   function collectRows(cells) {
     var out = { c1: [], c2: [], rows: [] };
@@ -99,5 +134,20 @@
     return out;
   }
 
-  return { parsePasted: parsePasted, collectRows: collectRows, fmt: fmt, fmtParts: fmtParts, fmtR2: fmtR2, summaryLines: summaryLines };
+  /** relErr(value, ref) → |value − ref| / |ref| × 100 (절댓값 %) */
+  function relErr(value, ref) {
+    if (value == null || ref == null || !isFinite(value) || !isFinite(ref) || ref === 0) return null;
+    return Math.abs(value - ref) / Math.abs(ref) * 100;
+  }
+
+  /** agree(value, ci, ref) → { inside: |value − ref| ≤ ci, ratio: |value − ref| / ci }. ci가 null이거나 0이면 둘 다 null */
+  function agree(value, ci, ref) {
+    if (ci == null || !isFinite(ci) || ci <= 0 || value == null || ref == null || !isFinite(value) || !isFinite(ref)) {
+      return { inside: null, ratio: null };
+    }
+    var d = Math.abs(value - ref);
+    return { inside: d <= ci, ratio: d / ci };
+  }
+
+  return { parsePasted: parsePasted, checkPaste: checkPaste, PASTE_WARN: PASTE_WARN, collectRows: collectRows, relErr: relErr, agree: agree, resultTSV: resultTSV, fmt: fmt, fmtParts: fmtParts, fmtR2: fmtR2, summaryLines: summaryLines };
 });

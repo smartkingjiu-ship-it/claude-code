@@ -1,0 +1,72 @@
+/* fx.css — 시각 효과 모양(움직임 줄이기 설정이면 끈다)
+ * transform / opacity / box-shadow 만 쓴다: 자리 밀림도 가로 스크롤도 만들지 않는다. */
+
+.fx-canvas { position: fixed; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+.fx-bg { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* 머리글 뒤에서 천천히 떠다니는 색 방울 (글자 뒤, 클릭 방해 없음) */
+  header.top { position: relative; isolation: isolate; }
+  .fx-bg {
+    display: block; position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    z-index: -1; overflow: hidden; pointer-events: none; border-radius: inherit;
+  }
+  .fx-bg::before, .fx-bg::after {
+    content: ""; position: absolute; width: 220px; height: 220px; border-radius: 50%;
+    opacity: 0.16; will-change: transform;
+  }
+  .fx-bg::before {
+    left: -60px; top: -90px;
+    background: radial-gradient(circle, var(--primary-2, #8b5cf6), transparent 70%);
+    animation: fx-drift-a 16s ease-in-out infinite alternate;
+  }
+  .fx-bg::after {
+    right: -60px; bottom: -110px;
+    background: radial-gradient(circle, var(--pink, #ec4899), transparent 70%);
+    animation: fx-drift-b 20s ease-in-out infinite alternate;
+  }
+  @keyframes fx-drift-a { to { transform: translate(90px, 50px) scale(1.25); } }
+  @keyframes fx-drift-b { to { transform: translate(-110px, -40px) scale(1.15); } }
+
+  /* 주요 버튼: 누르면 살짝 들어가고 빛 번짐 */
+  button.primary { transition: transform 0.12s ease, box-shadow 0.25s ease; }
+  button.primary:active {
+    transform: scale(0.97);
+    box-shadow: 0 0 0 6px rgba(91, 91, 240, 0.22);
+  }
+
+  /* 첫 결과가 나오기 전까지 체험 버튼 맥박 */
+  #btn-demo.fx-pulse { animation: fx-pulse 1.8s ease-out infinite; }
+  @keyframes fx-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.45); }
+    70% { box-shadow: 0 0 0 12px rgba(236, 72, 153, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+  }
+
+  /* 복사 버튼: 눌렀을 때 초록빛 반짝 */
+  .fx-copied { animation: fx-copied 0.7s ease-out; }
+  @keyframes fx-copied {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); transform: scale(0.96); }
+    40% { transform: scale(1.04); }
+    100% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); transform: scale(1); }
+  }
+
+  /* 결과 등장: 버튼을 누른 직후에만 붙는 fx-reveal */
+  #result-card.fx-reveal #guide,
+  #result-card.fx-reveal #excl,
+  #result-card.fx-reveal #result > *,
+  #result-card.fx-reveal > .row > button {
+    animation: fx-up 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  #result-card.fx-reveal #result > *:nth-child(n+3) { animation-delay: 0.06s; }
+  #result-card.fx-reveal #result > *:nth-child(n+5) { animation-delay: 0.12s; }
+  #result-card.fx-reveal #result > *:nth-child(n+7) { animation-delay: 0.18s; }
+  #result-card.fx-reveal #result > *:nth-child(n+9) { animation-delay: 0.24s; }
+  #result-card.fx-reveal #result > *:nth-child(n+11) { animation-delay: 0.3s; }
+  #result-card.fx-reveal > .row > button { animation-delay: 0.34s; }
+  @keyframes fx-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+}

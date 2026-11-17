@@ -4,37 +4,78 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LinLab(린랩) — 실험 데이터 선형화 도우미</title>
-  <link rel="icon" href="data:,">
+  <meta name="description" content="엑셀 측정값 두 열을 붙여 넣으면 선형화 그래프, 기울기와 95% 신뢰구간, ΔH 같은 물리량, 한글 수식 편집기용 수식을 바로 만들어 주는 실험 보고서 도우미입니다. 데이터는 브라우저 밖으로 나가지 않습니다.">
+  <meta name="theme-color" content="#5b5bf0">
+  <meta property="og:title" content="LinLab(린랩) — 실험 데이터 선형화 도우미">
+  <meta property="og:description" content="엑셀 측정값 붙여 넣기 → 기울기 ± 오차, ΔH, 한글 수식까지 1분. 데이터는 브라우저 밖으로 나가지 않습니다.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ko_KR">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%235b5bf0'/%3E%3Cstop offset='.55' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%23ec4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='15' fill='url(%23g)'/%3E%3Cpath d='M11 49 53 17' stroke='%23fff' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='19' cy='36' r='5' fill='%23fff'/%3E%3Ccircle cx='33' cy='39' r='5' fill='%23fff'/%3E%3Ccircle cx='44' cy='18' r='5' fill='%23fff'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="stories.css">
+  <link rel="stylesheet" href="fx.css">
+  <link rel="stylesheet" href="theme.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "LinLab(린랩)",
+    "description": "엑셀 측정값 두 열을 붙여 넣으면 선형화 그래프, 기울기와 95% 신뢰구간, 물리량, 한글 수식 편집기용 수식을 만들어 주는 실험 보고서 도우미",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Any (Web)",
+    "inLanguage": "ko",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" },
+    "featureList": [
+      "엑셀에서 복사한 두 열 붙여 넣기(머리글 줄 자동 건너뜀)",
+      "실험 종류 선택: 반트 호프(ΔH, ΔS), 어는점 내림(Kf), 아레니우스(Ea), 1차 반응(k, 반감기), 일반 선형",
+      "선형화 그래프와 표준화 잔차 그래프",
+      "기울기와 절편의 95% 신뢰구간, 결정계수 R²",
+      "이상치(×) 표시와 행을 뺀 뒤 다시 계산",
+      "문헌값과 비교한 상대 오차",
+      "한글 수식 편집기용 수식 복사",
+      "결과 표 복사",
+      "그래프 PNG 저장"
+    ]
+  }
+  </script>
 </head>
 <body>
   <header class="top">
+    <p class="badge">실험 보고서 도우미</p>
     <h1>LinLab <span class="sub">실험 데이터 선형화 도우미</span></h1>
     <p class="value">엑셀 측정값 붙여 넣기 → 기울기 ± 오차, ΔH, 한글 수식까지 1분</p>
-    <button type="button" id="btn-demo" class="primary demo">30초 체험: 틀린 측정값 찾기</button>
-    <ol class="howto">
-      <li>실험 종류를 고르고, 엑셀에서 측정값 두 열을 복사해 붙여 넣으세요.</li>
-      <li><b>계산하기</b>를 누르면 그래프, 기울기 ± 오차, 물리량이 나옵니다.</li>
-      <li><b>한글 수식 복사</b>를 눌러 한글 수식 편집기에 붙여 넣으세요.</li>
+    <div class="cta">
+      <button type="button" id="btn-demo" class="primary demo">30초 체험: 틀린 측정값 찾기</button>
+      <span class="cta-note">누르면 체험용 측정값이 들어가고 그래프가 바로 그려집니다.</span>
+    </div>
+    <ol class="howto" aria-label="사용 순서">
+      <li><span><b>붙여 넣기</b>실험 종류를 고르고, 엑셀에서 측정값 두 열을 복사해 붙여 넣으세요.</span></li>
+      <li><span><b>계산하기</b><b>계산하기</b>를 누르면 그래프, 기울기 ± 오차, 물리량이 나옵니다.</span></li>
+      <li><span><b>복사하기</b><b>한글 수식 복사</b>를 눌러 한글 수식 편집기에 붙여 넣으세요.</span></li>
     </ol>
+    <noscript><p class="noscript">이 도구는 자바스크립트로 계산합니다. 브라우저 설정에서 자바스크립트를 켜 주세요.</p></noscript>
   </header>
 
   <main>
-    <section class="card" id="input-card">
+    <section class="card" id="input-card" aria-label="측정값 입력">
+      <section id="stories" class="stories" aria-label="실험 이야기"></section>
       <div class="row">
         <label for="kind">실험 종류</label>
         <select id="kind"></select>
-        <span id="temp-unit-wrap" class="seg">
+        <span id="temp-unit-wrap" class="seg" role="group" aria-label="온도 단위">
           <label><input type="radio" name="tempUnit" value="C" checked> °C</label>
           <label><input type="radio" name="tempUnit" value="K"> K</label>
         </span>
         <button type="button" id="btn-sample" class="ghost">샘플 불러오기</button>
+        <button type="button" id="btn-big" class="ghost">1000점 샘플 불러오기</button>
       </div>
 
       <label for="paste" class="small">엑셀에서 복사한 두 열을 여기에 붙여 넣기 (머리글 줄은 자동으로 건너뜀)</label>
-      <textarea id="paste" rows="3" placeholder="15&#9;6926&#10;20&#9;4851"></textarea>
+      <textarea id="paste" rows="3" placeholder="15&#9;6926&#10;20&#9;4851" aria-describedby="paste-help"></textarea>
+      <p id="paste-help" class="help">엑셀에서 두 열을 끌어서 고르고 Ctrl+C → 위 칸을 누르고 Ctrl+V. 아래 표에 직접 써 넣어도 됩니다.</p>
 
-      <div class="table-wrap">
+      <div class="table-wrap" role="region" aria-label="측정값 표" tabindex="0">
         <table id="data">
           <thead><tr><th>포함 #</th><th id="h1">x</th><th id="h2">y</th><th></th></tr></thead>
           <tbody></tbody>
@@ -45,28 +86,39 @@
         <button type="button" id="btn-clear" class="ghost">모두 지우기</button>
         <button type="button" id="btn-calc" class="primary">계산하기</button>
       </div>
+      <p id="empty-hint" class="hint empty-hint">처음이라면 <b>샘플 불러오기</b>나 맨 위의 <b>30초 체험</b>을 눌러 보세요. 그래프와 결과가 바로 나옵니다.</p>
       <p id="msg" class="msg" role="status"></p>
     </section>
 
-    <section class="card" id="result-card" hidden>
-      <h2>결과</h2>
+    <section class="card" id="result-card" aria-labelledby="result-title" hidden>
+      <h2 id="result-title">결과</h2>
       <p id="guide" class="guide" role="status" hidden></p>
       <p id="excl" class="excl" hidden></p>
       <dl id="result"></dl>
-      <canvas id="plot" aria-label="선형화 그래프"></canvas>
-      <canvas id="resid" aria-label="표준화 잔차 그래프"></canvas>
-      <p class="small legend">● 측정점 &nbsp; <span style="color:#999">●</span> 뺀 점 &nbsp; × 이상치(그 점을 빼고 그은 직선에서 너무 먼 점) &nbsp; — 회귀 직선</p>
+      <div id="ref-wrap" class="ref" hidden>
+        <label for="ref-in"><span id="ref-label">문헌값</span></label>
+        <input type="text" id="ref-in" inputmode="decimal" autocomplete="off" placeholder="예: -52.0">
+        <span id="ref-unit" class="small"></span>
+        <p id="ref-out" class="ref-out" role="status"></p>
+      </div>
+      <div class="plot-frame">
+        <canvas id="plot" role="img" aria-label="선형화 그래프"></canvas>
+        <canvas id="resid" role="img" aria-label="표준화 잔차 그래프"></canvas>
+        <p class="small legend">● 측정점 &nbsp; <span style="color:#999">●</span> 뺀 점 &nbsp; × 이상치(그 점을 빼고 그은 직선에서 너무 먼 점) &nbsp; — 회귀 직선</p>
+      </div>
       <div class="row">
-        <button type="button" id="btn-hwp" class="primary">한글 수식 복사</button>
+        <button type="button" id="btn-hwp" class="primary">한글 수식 한 번에 복사</button>
+        <button type="button" id="btn-tsv" class="ghost">결과 표 복사</button>
         <button type="button" id="btn-png" class="ghost">그래프 PNG 저장</button>
       </div>
-      <pre id="hwp-preview" class="eq"></pre>
+      <div id="hwp-preview" class="eq"></div>
       <p id="done" class="done" hidden>체험 완료 코드: <b>LINLAB-2026</b></p>
     </section>
   </main>
 
-  <footer class="foot small">
-    계산: 최소제곱법, 기울기 표준오차, t-분포 95% 신뢰구간. 데이터는 브라우저 밖으로 나가지 않습니다.
+  <footer class="foot">
+    <p class="trust"><strong>믿을 수 있는 이유</strong> 최소제곱법 · t-분포 95% 신뢰구간 · 이상치는 외부 스튜던트화 잔차 · 데이터는 브라우저 밖으로 나가지 않음</p>
+    <p class="small">계산: 최소제곱법, 기울기 표준오차, t-분포 95% 신뢰구간. 데이터는 브라우저 밖으로 나가지 않습니다.</p>
   </footer>
 
   <script src="stats.js"></script>
@@ -74,6 +126,10 @@
   <script src="format.js"></script>
   <script src="hwpeq.js"></script>
   <script src="samples.js"></script>
+  <script src="scenarios.js"></script>
   <script src="app.js"></script>
+  <script src="sfx.js"></script>
+  <script src="stories.js"></script>
+  <script src="fx.js"></script>
 </body>
 </html>

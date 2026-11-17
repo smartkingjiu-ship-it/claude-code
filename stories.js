@@ -63,10 +63,10 @@
     host.classList.add('stories');
     host.setAttribute('aria-labelledby', 'stories-title');
     host.textContent = '';
-    var h = el('h2', 'st-title', '실험 이야기로 시작하기');
+    var h = el('h2', 'st-title', '실험 사례로 시작하기');
     h.id = 'stories-title';
     host.appendChild(h);
-    host.appendChild(el('p', 'st-sub', '카드를 고르면 실험 상황이 펼쳐지고, 측정값이 표에 바로 채워져요.'));
+    host.appendChild(el('p', 'st-sub', '사례를 고르면 실험 조건과 분석 과제가 나오고, 측정값 50개(이상치 1개 포함)가 표에 채워집니다.'));
     var row = el('div', 'st-row');
     list.forEach(function (s) {
       var b = el('button', 'st-card');
@@ -78,7 +78,7 @@
       b.appendChild(el('span', 'st-name', s.title));
       b.appendChild(el('span', 'st-hook', s.hook || ''));
       b.appendChild(el('span', 'st-tag', kindTag(s)));
-      b.appendChild(el('span', 'st-cta', '이야기 열기'));
+      b.appendChild(el('span', 'st-cta', '사례 열기'));
       b.addEventListener('click', function () { openStory(s, b); });
       row.appendChild(b);
     });
@@ -191,10 +191,10 @@
     parts.title.textContent = s.title;
     parts.scene.textContent = s.scene || '';
     parts.q.textContent = '';
-    parts.q.appendChild(el('span', 'st-q-label', '궁금한 점'));
+    parts.q.appendChild(el('span', 'st-q-label', '분석 과제'));
     parts.q.appendChild(doc.createTextNode(s.question || ''));
     parts.how.textContent = '';
-    parts.how.appendChild(el('b', null, '이렇게 그려요'));
+    parts.how.appendChild(el('b', null, '선형화'));
     parts.how.appendChild(doc.createTextNode(' ' + (s.how || '')));
     fillTable(s);
     var src = '자료: ' + (s.source || '직접 만든 연습용 데이터');
@@ -235,6 +235,8 @@
       }
       paste.value = s.rows.map(function (r) { return num(r[0]) + '\t' + num(r[1]); }).join('\n');
       fire(paste, 'change');                       // app.js가 붙여 넣기 칸의 change에서 표를 채운다
+      var unk = $('unk-in');                       // 검량선: 미지 시료 흡광도(계산 전에 넣어 재생 효과를 끊지 않는다)
+      if (unk) unk.value = s.unknownA != null ? num(s.unknownA) : '';
       calc.click();                                // 재생 효과가 있는 계산 + 결과로 이동
       var refIn = $('ref-in'), refWrap = $('ref-wrap');
       if (s.ref && refIn && refWrap && !refWrap.hidden) {
@@ -273,7 +275,7 @@
     e.setAttribute('aria-hidden', 'true');
     n.appendChild(e);
     n.appendChild(el('b', 'st-note-title', s.title));
-    n.appendChild(doc.createTextNode(' 이야기의 측정값이에요. '));
+    n.appendChild(doc.createTextNode(' 사례의 측정값입니다. '));
     n.appendChild(el('span', 'st-note-q', s.question || ''));
   }
   function removeNote() {

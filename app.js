@@ -8,11 +8,13 @@
   // 숫자 뒤 조사 "로/으로": 끝자리를 읽은 소리(영·삼·육은 받침 → 으로, 일·칠·팔은 ㄹ 받침 → 로)
   function ro(numText) { return /[036]$/.test(String(numText)) ? '으로' : '로'; }
   // 30초 체험 유도 문구. 숫자는 체험 데이터(samples.js DEMO)와 계산값에서 채운다(하드코딩 금지)
-  // M1-3이 끝나면 outlier 문구만 "5행이 튀었습니다(×). 5행의 '포함'을 꺼 보세요."로 바꾸고, 값을 고치는 경로의 fixed 문구는 그대로 둔다(SPEC M1-3)
   var GUIDE = {
     outlier: function () {
-      var d = L.DEMO, bad = d.rows[d.row - 1][1];
-      return d.row + '행 K(' + bad + ')가 튀었습니다(×). 원래 값 ' + d.fixValue + ro(d.fixValue) + ' 고쳐 보세요.';
+      var d = L.DEMO;
+      return d.row + '행이 튀었습니다(×). ' + d.row + "행의 '포함'을 꺼 보세요.";
+    },
+    excluded: function (before, after) {
+      return L.DEMO.row + '행을 뺐습니다. ΔH 오차 ±' + before + ' → ±' + after + ' kJ/mol. 보고서에 뺀 이유를 적으세요.';
     },
     fixed: function (before, after, r2before) {
       var r2 = r2before == null ? null : r2before.toFixed(3);
@@ -42,11 +44,11 @@
     var tb = $('data').tBodies[0];
     var tr = document.createElement('tr');
     var n = tb.rows.length + 1;
-    tr.innerHTML = '<td class="num">' + n + '</td>' +
+    tr.innerHTML = '<td class="num"><label class="inc-wrap"><input type="checkbox" class="inc" checked aria-label="' + n + '행 포함"><span class="rn">' + n + '</span></label></td>' +
       '<td><input type="text" inputmode="decimal" aria-label="1열 ' + n + '행"></td>' +
       '<td><input type="text" inputmode="decimal" aria-label="2열 ' + n + '행"></td>' +
       '<td><button type="button" class="del" aria-label="' + n + '행 삭제">✕</button></td>';
-    var ins = tr.querySelectorAll('input');
+    var ins = tr.querySelectorAll('input[type="text"]');
     ins[0].value = v1 == null ? '' : v1;
     ins[1].value = v2 == null ? '' : v2;
     tb.appendChild(tr);
@@ -54,7 +56,7 @@
 
   function renumber() {
     Array.prototype.forEach.call($('data').tBodies[0].rows, function (tr, i) {
-      tr.cells[0].textContent = i + 1;
+      tr.querySelector('.rn').textContent = i + 1;
     });
   }
 
@@ -64,36 +66,35 @@
     while ($('data').tBodies[0].rows.length < 5) addRow('', '');
   }
 
-  function readRows() {
-    var c1 = [], c2 = [];
-    Array.prototype.forEach.call($('data').tBodies[0].rows, function (tr) {
-      var ins = tr.querySelectorAll('input');
-      var a = ins[0].value.trim(), b = ins[1].value.trim();
-      if (a === '' && b === '') return; // 완전히 빈 행은 무시
-      c1.push(a); c2.push(b);
-    });
-    return { c1: c1, c2: c2 };
-  }
+  function bodyRows() { return Array.prototype.slice.call($('data').tBodies[0].rows); }
 
-  // 비어 있지 않은 행들의 <tr> 목록 (analyze의 행 번호와 맞추기 위함)
-  function filledRows() {
-    return Array.prototype.filter.call($('data').tBodies[0].rows, function (tr) {
-      var ins = tr.querySelectorAll('input');
-      return ins[0].value.trim() !== '' || ins[1].value.trim() !== '';
+  // 표 → collectRows(빈 행 건너뜀, 표 행 번호 기억) + "포함"을 끈 행 번호
+  function readRows() {
+    var trs = bodyRows();
+    var d = L.collectRows(trs.map(function (tr) {
+      var ins = tr.querySelectorAll('input[type="text"]');
+      return [ins[0].value, ins[1].value];
+    }));
+    d.exclude = [];
+    trs.forEach(function (tr, i) {
+      var on = tr.querySelector('.inc').checked;
+      tr.classList.toggle('excluded', !on);
+      if (!on) d.exclude.push(i + 1);
     });
+    return d;
   }
 
   function markCells(result) {
     var K = kindDef();
-    var trs = filledRows();
-    Array.prototype.forEach.call($('data').tBodies[0].rows, function (tr) {
+    var trs = bodyRows();   // analyze가 표 행 번호를 돌려준다
+    trs.forEach(function (tr) {
       tr.classList.remove('outlier');
-      tr.querySelectorAll('input').forEach(function (i) { i.classList.remove('bad'); });
+      tr.querySelectorAll('input[type="text"]').forEach(function (i) { i.classList.remove('bad'); });
     });
     result.invalid.forEach(function (rowNum) {
       var tr = trs[rowNum - 1];
       if (!tr) return;
-      var ins = tr.querySelectorAll('input');
+      var ins = tr.querySelectorAll('input[type="text"]');
       var v1 = Number(ins[0].value), v2 = Number(ins[1].value);
       if (ins[0].value.trim() === '' || !isFinite(v1)) ins[0].classList.add('bad');
       if (ins[1].value.trim() === '' || !isFinite(v2) || (K.logY && v2 <= 0)) ins[1].classList.add('bad');
@@ -130,6 +131,8 @@
     if (result.outlierRows.length) {
       if (state.demo.before == null) { state.demo.before = ci; state.demo.r2 = result.fit.r2; }
       g.textContent = GUIDE.outlier(); g.className = 'guide';
+    } else if (state.demo.before != null && result.excludedRows.indexOf(L.DEMO.row) >= 0) {
+      g.textContent = GUIDE.excluded(state.demo.before, ci); g.className = 'guide ok';
     } else if (state.demo.before != null) {
       g.textContent = GUIDE.fixed(state.demo.before, ci, state.demo.r2); g.className = 'guide ok';
     } else { g.hidden = true; return; }
@@ -146,13 +149,18 @@
   function calculate() {
     var kind = $('kind').value;
     var d = readRows();
-    var result = L.analyze(kind, d.c1, d.c2, { tempUnit: tempUnit() });
+    var result = L.analyze(kind, d.c1, d.c2, { tempUnit: tempUnit(), rows: d.rows, exclude: d.exclude });
+    // 제외 전 결과(비교 한 줄용)
+    result.before = d.exclude.length ? L.analyze(kind, d.c1, d.c2, { tempUnit: tempUnit(), rows: d.rows }) : null;
     state.result = result; state.kind = kind;
     markCells(result);
     $('done').hidden = true;
     $('hwp-preview').textContent = '';
 
     var notes = [];
+    L.checkInput(kind, d.c1, d.c2, { tempUnit: tempUnit() }).warnings.forEach(function (w) {
+      notes.push(L.TEMP_WARN[w]);
+    });
     if (result.invalid.length) {
       notes.push(result.invalid.length + '개 행은 숫자가 아니거나' +
         (kindDef().logY ? ' 0 이하라서(ln을 취할 수 없음)' : '') + ' 계산에서 뺐습니다 (빨간 칸).');
@@ -196,6 +204,17 @@
       items.push(['ΔH', L.fmt(v.dH_kJ, v.dH_ci_kJ) + ' kJ/mol']);
       items.push(['ΔS', L.fmt(v.dS, v.dS_ci) + ' J/(mol·K)']);
     }
+    var ex = $('excl');
+    if (result.excludedRows.length) {
+      var line = '제외 ' + result.excludedRows.length + '개(' + result.excludedRows.join(', ') + '행) — 보고서에 제외 이유를 적으세요.';
+      var b = result.before;
+      if (b && kind === 'vanthoff' && b.values.dH_kJ != null && v.dH_kJ != null) {
+        line += ' 제외 전 ΔH ' + L.fmt(b.values.dH_kJ, b.values.dH_ci_kJ) + ' → 제외 후 ' + L.fmt(v.dH_kJ, v.dH_ci_kJ) + ' kJ/mol';
+      } else if (b && b.fit.b != null && f.b != null) {
+        line += ' 제외 전 기울기 ' + L.fmt(b.fit.b, b.fit.ci95) + ' → 제외 후 ' + L.fmt(f.b, f.ci95);
+      }
+      ex.textContent = line; ex.hidden = false;
+    } else { ex.hidden = true; }
     $('result').innerHTML = items.map(function (it) {
       return '<dt>' + it[0] + '</dt><dd>' + it[1] + '</dd>';
     }).join('') + (f.ci95 != null ? '<dt></dt><dd class="small">± 는 95% 신뢰구간 (t = ' + f.t + ', 자유도 ' + (f.n - 2) + ')</dd>' : '');
@@ -277,8 +296,12 @@
     var K = L.KINDS[result.kind];
     var f = result.fit;
     var pad = { l: 58, r: 12, t: 12, b: 40 };
-    var fr = frame(c, result.x, result.y, pad, K.xLabel, K.yLabel);
+    var exX = result.excludedXY.map(function (p) { return p[0]; }), exY = result.excludedXY.map(function (p) { return p[1]; });
+    var fr = frame(c, result.x.concat(exX), result.y.concat(exY), pad, K.xLabel, K.yLabel);
     var ctx = c.ctx;
+    result.excludedXY.forEach(function (p) {   // 뺀 점은 회색으로 남긴다
+      ctx.fillStyle = '#bbb'; ctx.beginPath(); ctx.arc(fr.X(p[0]), fr.Y(p[1]), 4, 0, Math.PI * 2); ctx.fill();
+    });
     if (f.b != null) {
       ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
       ctx.beginPath();

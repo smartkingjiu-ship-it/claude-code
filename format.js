@@ -16,13 +16,21 @@
    * 첫 줄에 숫자가 아닌 칸이 있으면 머리글로 보고 건너뛴다.
    * 숫자인 칸은 number, 아닌 칸은 원래 글자 그대로 둔다(화면에서 빨갛게 표시).
    */
+  var THOUSANDS = /^-?[1-9]\d{0,2}(,\d{3})+(\.\d+)?$/;
+
   function parsePasted(text) {
     var lines = String(text).split(/\r?\n|\r/)
       .map(function (l) { return l.trim(); })
       .filter(function (l) { return l !== ''; });
     var rows = lines.map(function (l) {
-      var cells = /[\t,;]/.test(l) ? l.split(/\s*[\t,;]\s*/) : l.split(/\s+/);
-      return cells.slice(0, 2).map(function (c) { return c.trim(); });
+      var cells;
+      if (/\t/.test(l)) cells = l.split(/\t/);                    // 탭이 있으면 탭으로만
+      else if (/[,;]/.test(l)) cells = l.split(/\s*[,;]\s*/);
+      else cells = l.split(/\s+/);
+      return cells.slice(0, 2).map(function (c) {
+        c = c.trim();
+        return THOUSANDS.test(c) ? c.replace(/,/g, '') : c;          // 6,926 → 6926 (0,926은 그대로)
+      });
     });
     if (rows.length && rows[0].some(function (c) { return !isNumText(c); })) rows.shift();
     return rows.map(function (r) {
@@ -80,5 +88,16 @@
     return lines;
   }
 
-  return { parsePasted: parsePasted, fmt: fmt, fmtParts: fmtParts, fmtR2: fmtR2, summaryLines: summaryLines };
+  /** collectRows(cells) → { c1, c2, rows } — 표 순서의 [[칸1, 칸2], …]에서 두 칸 모두 빈 행만 건너뛰고 표 행 번호(1부터)를 기억 */
+  function collectRows(cells) {
+    var out = { c1: [], c2: [], rows: [] };
+    (cells || []).forEach(function (r, i) {
+      var a = String(r[0] == null ? '' : r[0]).trim(), b = String(r[1] == null ? '' : r[1]).trim();
+      if (a === '' && b === '') return;
+      out.c1.push(a); out.c2.push(b); out.rows.push(i + 1);
+    });
+    return out;
+  }
+
+  return { parsePasted: parsePasted, collectRows: collectRows, fmt: fmt, fmtParts: fmtParts, fmtR2: fmtR2, summaryLines: summaryLines };
 });

@@ -36,7 +36,7 @@
 
       <div class="table-wrap">
         <table id="data">
-          <thead><tr><th>#</th><th id="h1">x</th><th id="h2">y</th><th></th></tr></thead>
+          <thead><tr><th>포함 #</th><th id="h1">x</th><th id="h2">y</th><th></th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -51,10 +51,11 @@
     <section class="card" id="result-card" hidden>
       <h2>결과</h2>
       <p id="guide" class="guide" role="status" hidden></p>
+      <p id="excl" class="excl" hidden></p>
       <dl id="result"></dl>
       <canvas id="plot" aria-label="선형화 그래프"></canvas>
       <canvas id="resid" aria-label="표준화 잔차 그래프"></canvas>
-      <p class="small legend">● 측정점 &nbsp; × 이상치(그 점을 빼고 그은 직선에서 너무 먼 점) &nbsp; — 회귀 직선</p>
+      <p class="small legend">● 측정점 &nbsp; <span style="color:#999">●</span> 뺀 점 &nbsp; × 이상치(그 점을 빼고 그은 직선에서 너무 먼 점) &nbsp; — 회귀 직선</p>
       <div class="row">
         <button type="button" id="btn-hwp" class="primary">한글 수식 복사</button>
         <button type="button" id="btn-png" class="ghost">그래프 PNG 저장</button>

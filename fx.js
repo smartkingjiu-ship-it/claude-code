@@ -94,15 +94,7 @@
     card.classList.add('fx-reveal');
     clearTimeout(revealTimer);
     revealTimer = setTimeout(function () { card.classList.remove('fx-reveal'); }, 900);
-    if (storyClick && t - storyClick <= WINDOW_MS) {
-      var r = card.getBoundingClientRect();
-      confetti({
-        x: Math.min(Math.max(r.left + r.width / 2, 20), window.innerWidth - 20),
-        y: Math.min(Math.max(r.top + 40, 40), window.innerHeight - 40),
-        count: 28, power: 5, life: 900, round: true
-      });
-    }
-    storyClick = 0;
+    storyClick = 0;   // 실험 사례 계산에는 색종이를 터뜨리지 않는다(보고서 수준의 어조에 맞춤). 색종이는 30초 체험 완료 때만
   }
   function queueResult() {
     if (queued) return;

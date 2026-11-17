@@ -205,7 +205,9 @@
     modal.classList.remove('st-in');
     void modal.offsetWidth;
     modal.classList.add('st-in');
-    parts.go.focus();
+    // 초점을 주되 팝업 안쪽이 버튼 쪽으로 밀려 내려가지 않게(휴대폰에서 제목이 가려지던 문제)
+    try { parts.go.focus({ preventScroll: true }); } catch (err) { parts.go.focus(); }
+    if (modal.firstChild) modal.firstChild.scrollTop = 0;
   }
 
   function closeModal(restoreFocus) {
